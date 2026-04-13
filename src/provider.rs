@@ -86,8 +86,6 @@ impl Provider {
     pub fn get_table_type(&self, cli: &Cli, table_type: &str) -> Option<TableType> {
         match cli.type_provider {
             TypeProvider::Mysql => TableType::from_mysql(table_type),
-        };
-
-        None
+        }
     }
 }

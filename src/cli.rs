@@ -1,7 +1,9 @@
+use std::error::Error;
 use std::path::PathBuf;
 
-use anyhow::{Context, Result, bail};
 use clap::{ArgAction, Parser, ValueEnum};
+
+type CliResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
 pub enum TypeProvider {
@@ -87,10 +89,10 @@ impl Cli {
         Self::parse()
     }
 
-    pub fn resolve_password(&mut self) -> Result<()> {
+    pub fn resolve_password(&mut self) -> CliResult<()> {
         if let Some(env_name) = &self.password_env {
             let value = std::env::var(env_name)
-                .with_context(|| format!("environment variable {env_name} is not set"))?;
+                .map_err(|_| format!("environment variable {env_name} is not set"))?;
             self.password = Some(value);
             return Ok(());
         }
@@ -103,9 +105,9 @@ impl Cli {
         Ok(())
     }
 
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self) -> CliResult<()> {
         if self.no_data && self.no_create_info {
-            bail!("--no-data and --no-create-info cannot be used together");
+            return Err("--no-data and --no-create-info cannot be used together".into());
         }
 
         Ok(())
