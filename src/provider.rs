@@ -1,8 +1,10 @@
 pub mod mysql;
+pub mod table_type;
 
 use crate::cli::{Cli, TypeProvider};
 use crate::provider::mysql::MysqlProvider;
 use std::io::Write;
+use table_type::TableType;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ObjectKind {
@@ -79,5 +81,13 @@ impl Provider {
         match &mut self.backend {
             ProviderBackend::MySql(mysql) => mysql.dump_database(cli, objects, writer),
         }
+    }
+
+    pub fn get_table_type(&self, cli: &Cli, table_type: &str) -> Option<TableType> {
+        match cli.type_provider {
+            TypeProvider::Mysql => TableType::from_mysql(table_type),
+        };
+
+        None
     }
 }

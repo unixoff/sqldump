@@ -1,34 +1,11 @@
 use crate::cli::Cli;
-use crate::provider::{DbObject, ObjectKind, Provider};
+use crate::provider::{DbObject, Provider};
 use std::fs::File;
 use std::io::{self, BufWriter, Write};
 
 pub struct App {
     cli: Cli,
     provider: Provider,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum TableType {
-    BaseTable,
-    View,
-}
-
-impl TableType {
-    fn from_mysql(value: &str) -> Option<Self> {
-        match value {
-            "BASE TABLE" => Some(Self::BaseTable),
-            "VIEW" => Some(Self::View),
-            _ => None,
-        }
-    }
-
-    fn object_kind(self) -> ObjectKind {
-        match self {
-            Self::BaseTable => ObjectKind::BaseTable,
-            Self::View => ObjectKind::View,
-        }
-    }
 }
 
 impl App {
@@ -90,7 +67,7 @@ impl App {
                 continue;
             }
 
-            let Some(table_type) = TableType::from_mysql(&table_type) else {
+            let Some(table_type) = self.provider.get_table_type(&self.cli, &table_type) else {
                 continue;
             };
             let kind = table_type.object_kind();
